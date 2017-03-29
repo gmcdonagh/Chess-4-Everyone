@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title> Settings </title>
+  <link href="chessstyle.css" type="text/css" rel="stylesheet">
+  <script>
+  function toggleDropdown(dropdownElement){
+    var ulsettlist = dropdownElement.getElementsByClassName('ulsettlist')
+
+    if(ulsettlist[0].style.visibility == "visible"){
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "";
+      }
+    }
+    else {
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "visible";
+    }
+  }
+}
+  </script>
+ </head>
+
+ <body>
+   <h1>SETTINGS</h1>
+   <div class="dropdown">
+    <div>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[0]);">Difficulty</button>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[1]);"> Player Select </button>
+  </div>
+  <table><tr><td>
+    <div class = "ulsett">
+        <div class="ulsettlist">One</div>
+        <div class="ulsettlist">Two</div>
+        <div class="ulsettlist">Three</div>
+        <div class="clearboth"></div>
+      </div>
+  </td><td>
+      <div class = "ulsett">
+      <div class="ulsettlist">Player vs. Comp</div>
+      <div class="ulsettlist">Player vs. Player</div>
+      <div class="clearboth"></div>
+    </div>
+  </td></tr></table>
+  </div>
+  <div class = "title">
+    <div class="titlelist">Start</div>
+    <div class="titlelist">Default Settings</div>
+  </div>
+
+
+ </body>
+
+</html>
