@@ -1234,7 +1234,7 @@ var Chess = function(fen) {
     },
 
     in_draw: function() {
-      return half_moves >= 200 ||
+      return half_moves >= 00 ||
              in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
@@ -1249,7 +1249,7 @@ var Chess = function(fen) {
     },
 
     game_over: function() {
-      return half_moves >= 10 ||
+      return half_moves >= 100 ||
              in_checkmate() ||
              in_stalemate() ||
              insufficient_material() ||
