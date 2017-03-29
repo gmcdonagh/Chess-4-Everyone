@@ -2371,8 +2371,6 @@ function executeGame(difficultySetting, playerSetting) {
         
        userMove3();
     }
-    
->>>>>>> 629e0349ac917337d38ebbe1822560b054d3707c
 };
 
 function executeMainMenu(){
