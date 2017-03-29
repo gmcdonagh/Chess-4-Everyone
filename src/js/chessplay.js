@@ -1234,7 +1234,7 @@ var Chess = function(fen) {
     },
 
     in_draw: function() {
-      return half_moves >= 100 ||
+      return half_moves >= 200 ||
              in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
@@ -1249,7 +1249,7 @@ var Chess = function(fen) {
     },
 
     game_over: function() {
-      return half_moves >= 100 ||
+      return half_moves >= 10 ||
              in_checkmate() ||
              in_stalemate() ||
              insufficient_material() ||
@@ -2094,6 +2094,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
         
         var userMove = function() {
+            turn = game.turn();
             var possibleMoves = game.moves();
 
               // game over
@@ -2113,9 +2114,12 @@ function executeGame(difficultySetting, playerSetting) {
                     $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                     $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                     $(window).off("keypress");
-                    if(game.in_checkmate() === true || game.in_draw() === true){
-                        return;
-                    }
+                    if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                        }
                     else{
                         window.setTimeout(userMove, 500);
                     }
@@ -2141,6 +2145,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
         
         var userMove2 = function() {
+            turn = game.turn();
             var move_state = "move1";
             var possibleMoves = game.moves();
             var randomIndex = 0;
@@ -2184,8 +2189,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove2, 500);
@@ -2208,8 +2216,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove2, 500);
@@ -2239,6 +2250,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
     
         var userMove3 = function() {
+            turn = game.turn();
             var move_state = "move1";
             var possibleMoves = game.moves();
             var randomIndex = 0;
@@ -2305,8 +2317,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2331,8 +2346,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2357,8 +2375,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2371,6 +2392,7 @@ function executeGame(difficultySetting, playerSetting) {
         
        userMove3();
     }
+    
 };
 
 function executeMainMenu(){
