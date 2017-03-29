@@ -4,63 +4,53 @@
 
 <head>
 
-<style>
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-li {
-  float: left;
-}
-
-li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-li a:hover{
-  background-color: #ffc0cb;
-}
-
-.active {
-  background-color: #4CAF50;
-}
-</style>
-
 <title> Settings </title>
+  <link href="chessstyle.css" type="text/css" rel="stylesheet">
+  <script>
+  function toggleDropdown(dropdownElement){
+    var ulsettlist = dropdownElement.getElementsByClassName('ulsettlist')
 
-<script src="http://www.cs.unc.edu/Courses/comp426-f16/jquery-3.1.0.js">
-</script>
-<script src = "js/chessboard-0.3.0.js">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
-
-
+    if(ulsettlist[0].style.visibility == "visible"){
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "";
+      }
+    }
+    else {
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "visible";
+    }
+  }
+}
+  </script>
  </head>
 
  <body>
-   <ul>
-     <li style="float:left"><a class="active" href="#">Difficulty</a></li>
-     <li><a href="#">One</a></li>
-     <li><a href="#">Two</a></li>
-     <li><a href="#">Three</a></li>
-   </ul>
+   <h1>SETTINGS</h1>
+   <div class="dropdown">
+    <div>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[0]);">Difficulty</button>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[1]);"> Player Select </button>
+  </div>
+  <table><tr><td>
+    <div class = "ulsett">
+        <div class="ulsettlist">One</div>
+        <div class="ulsettlist">Two</div>
+        <div class="ulsettlist">Three</div>
+        <div class="clearboth"></div>
+      </div>
+  </td><td>
+      <div class = "ulsett">
+      <div class="ulsettlist">Player vs. Comp</div>
+      <div class="ulsettlist">Player vs. Player</div>
+      <div class="clearboth"></div>
+    </div>
+  </td></tr></table>
+  </div>
+  <div class = "title">
+    <div class="titlelist">Start</div>
+    <div class="titlelist">Default Settings</div>
+  </div>
 
-     <ul>
-      <li style="float:left"><a class="active" href="#">Player Selection</a></li>
-       <li><a href="#">Player vs. Computer</a></li>
-       <li><a href="#">Player vs. Player</a></li>
-     </ul>
-     <ul>
-     <li><a class = "active" href = "Chess.html">Start</a></li>
-     </ul>
 
  </body>
 
