@@ -1,5 +1,5 @@
 *{
-  font-family:"Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
+  font-family: "Comic Sans", "Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
 }
 .quist {
   text-align: center;
@@ -107,28 +107,40 @@ p {
 }
 .whitewins {
   background-color: #2626d1;
-  margin-top: 400px;
+  position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
   color: white;
   text-align: center;
   font-size: 36px;
-  padding: 16px;
+  padding: 56px 0px;
   border-radius: 12px;
 }
 .blackwins {
   background-color: #49eb74;
-  margin-top: 400px;
+  position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
   color: black;
   text-align: center;
   font-size: 36px;
-  padding: 16px;
+  padding: 56px 0px;
   border-radius: 12px;
 }
 .draw {
   background-color: #42706c;
-  margin-top: 400px;
+  position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
   color: white;
   text-align: center;
   font-size: 36px;
-  padding: 16px;
+  padding: 56px 0px;
   border-radius: 12px;
 }
