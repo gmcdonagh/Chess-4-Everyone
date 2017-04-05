@@ -19,6 +19,20 @@ div.quistlist {
 div.quistlist:last-child {
     border-right: none;
 }
+button.quistlist{
+  background-color: #90C3D4;
+  display: inline-block;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 22px;
+  padding: 32px;
+  margin: 0;
+  border-radius: 12px;
+}
+button.quistlist:last-child {
+    border-right: none;
+}
 div.ulsett {
   display: inline-block;
   width: 200px;
@@ -63,6 +77,19 @@ div.titlelist {
   text-align: center;
   border-radius: 12px;
 }
+button.titlelist {
+  display: inline-block;
+  padding: 16px;
+  margin-left: 4px;
+  margin-top: -15px;
+  width: 200px;
+  float:right;
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  font-size: 16px;
+  border-radius: 12px;
+}
 button.dropbtn {
     display: inline-block;
     width: 200px;
@@ -77,6 +104,33 @@ button.dropbtn {
 div.dropdown {
     position: absolute;
     display: inline-block;
+}
+div.whitewins {
+  text-align: center;
+  color: white;
+  background-color: #e06024;
+  margin-top: 400px;
+  padding: 64px;
+  font-size: 64px;
+  border-radius: 12px;
+}
+div.blackwins {
+  text-align: center;
+  color: black;
+  background-color: #afe0af;
+  margin-top: 400px;
+  padding: 64px;
+  font-size: 64px;
+  border-radius: 12px;
+}
+div.draw {
+  text-align: center;
+  color: white;
+  background-color: #69078a;
+  margin-top: 400px;
+  padding: 64px;
+  font-size: 64px;
+  border-radius: 12px;
 }
 body {
   background-color: #333333;
