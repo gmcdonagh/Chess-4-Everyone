@@ -15,6 +15,9 @@
 
 /* board */
 .board-b72b1 {
+  position: fixed;
+  top: 50%;
+  left: 50%;
   border: 2px solid #404040;
   -moz-box-sizing: content-box;
   box-sizing: content-box;

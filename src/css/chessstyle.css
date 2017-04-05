@@ -1,22 +1,21 @@
 *{
   font-family:"Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
 }
-div.quist {
+.quist {
   text-align: center;
   color: white;
 }
-div.quistlist {
+.quistlist {
   background-color: #90C3D4;
-  display: inline-block;
   color: white;
   text-align: center;
   width: 200px;
-  font-size: 32px;
-  padding: 32px;
+  font-size: 26px;
+  padding: 16px;
   margin: 0;
   border-radius: 12px;
 }
-div.quistlist:last-child {
+.quistlist:last-child {
     border-right: none;
 }
 div.ulsett {
@@ -44,14 +43,16 @@ div.ulsettlist{
 div.clearboth {
   clear:both;
 }
+table {
+  margin:auto;
+}
 div.title {
   display: inline-block;
   padding: 16px;
   align-items: center;
   justify-content: center;
-  float:right;
 }
-div.titlelist {
+.titlelist {
   display: inline-block;
   padding: 16px;
   margin-left: 4px;
@@ -75,8 +76,18 @@ button.dropbtn {
     cursor: pointer;
 }
 div.dropdown {
-    position: absolute;
-    display: inline-block;
+    text-align: center;
+}
+div.textbox {
+  border: 1px solid #FFFFFF;
+  padding: 10px;
+  width: 200px;
+}
+input[type="text"] {
+  border: 1px solid #FFFFFF;
+  font-size: 16px;
+  padding: 10px;
+  width: 200px;
 }
 body {
   background-color: #333333;
@@ -88,4 +99,36 @@ h1{
 }
 td {
   vertical-align: top;
+}
+p {
+  text-align: center;
+  font-size: 26px;
+  color: white;
+}
+.whitewins {
+  background-color: #2626d1;
+  margin-top: 400px;
+  color: white;
+  text-align: center;
+  font-size: 36px;
+  padding: 16px;
+  border-radius: 12px;
+}
+.blackwins {
+  background-color: #49eb74;
+  margin-top: 400px;
+  color: black;
+  text-align: center;
+  font-size: 36px;
+  padding: 16px;
+  border-radius: 12px;
+}
+.draw {
+  background-color: #42706c;
+  margin-top: 400px;
+  color: white;
+  text-align: center;
+  font-size: 36px;
+  padding: 16px;
+  border-radius: 12px;
 }
