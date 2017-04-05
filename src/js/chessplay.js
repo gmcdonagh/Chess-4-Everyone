@@ -2397,6 +2397,7 @@ function executeMainMenu(){
     curr_state = "quickplay";
     $('#body').append("<h1>MAIN MENU</h1><div class = \"quist\"><div id = \"qplay\" class=\"quistlist\">Quick Start</div><div id = \"settings\" class=\"quistlist\">Settings</div></div>");
     $('#qplay').css("background-color", "orange");
+    $('#settings').css("background-color", "gray");
     
     $(window).on("keypress", function(e){
        if(curr_state == "quickplay")
