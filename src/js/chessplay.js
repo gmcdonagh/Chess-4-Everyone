@@ -1651,7 +1651,6 @@ function endGame(outcome, difficultySetting, playerSetting) {
                 $(window).off("keypress");
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
-                $("#board").css("margin", "auto");
                 executeGame(difficultySetting,playerSetting);
             }
             
@@ -2416,7 +2415,6 @@ function executeMainMenu(){
                 $(window).off("keypress");
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
-                $("#board").css("margin", "auto");
                 executeGame(1,1);
             }
             
@@ -2621,7 +2619,6 @@ function executeSettings() {
             {
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
-                $("#board").css("margin", "auto");
                 $(window).off("keypress");
                 executeGame(difficulty, players);
             }
