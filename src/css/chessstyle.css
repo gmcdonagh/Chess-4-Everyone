@@ -18,6 +18,36 @@
 .quistlist:last-child {
     border-right: none;
 }
+.restartandsave {
+  text-align: center;
+  color: white;
+}
+.save {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin: 0;
+  border-radius: 12px;
+}
+.save:last-child {
+  border-right: none;
+}
+.restart {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin: 0;
+  border-radius: 12px;
+}
+.restart:last-child {
+  border-right: none;
+}
 div.ulsett {
   display: inline-block;
   width: 200px;
