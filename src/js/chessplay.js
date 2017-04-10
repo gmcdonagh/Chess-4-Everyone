@@ -1,61 +1,3 @@
-<<<<<<< HEAD
-function executeGame(playerSetting, difficultySetting) {
-    // do not pick up pieces if the game is over
-    // only pick up pieces for White
-    var board;
-
-    var onDragStart = function(source, piece, position, orientation) {
-      if (game.in_checkmate() === true || game.in_draw() === true ||
-        piece.search(/^b/) !== -1) {
-        return false;
-      }
-    };
-
-    var makeRandomMove = function() {
-      var possibleMoves = game.moves();
-
-      // game over
-      if (possibleMoves.length === 0) return;
-
-      var randomIndex = Math.floor(Math.random() * possibleMoves.length);
-      game.move(possibleMoves[randomIndex]);
-      board.position(game.fen());
-    };
-
-    var onDrop = function(source, target) {
-      // see if the move is legal
-      var move = game.move({
-        from: source,
-        to: target,
-        promotion: 'q' // NOTE: always promote to a queen for example simplicity
-      });
-
-      // illegal move
-      if (move === null) return 'snapback';
-
-      // make random legal move for black
-      window.setTimeout(makeRandomMove, 250);
-    };
-
-    // update the board position after the piece snap
-    // for castling, en passant, pawn promotion
-    var onSnapEnd = function() {
-      board.position(game.fen());
-    };
-
-    var cfg = {
-      draggable: true,
-      position: 'start',
-      onDragStart: onDragStart,
-      onDrop: onDrop,
-      onSnapEnd: onSnapEnd
-    };
-
-    var game = new Chess();
-
-    board = ChessBoard('board', cfg);
-    alert("D: " + playerSetting + " P: " + difficultySetting);
-=======
 var Chess = function(fen) {
 
   /* jshint indent: false */
@@ -1675,33 +1617,32 @@ function getRandomInt(min, max) {
 function endGame(outcome, difficultySetting, playerSetting) {
     curr_state = "replay";
     $(body).empty();
-    $(body).append("<div id=\"outcome\" style=\"width: 400px\"></div>");
+    $(body).append("<h1 id = \"outcome\"></h1><div class = \"quist\"><div><div id = \"replay\"class=\"quistlist\">Replay</div><div id = \"main\" class=\"quistlist\">Main Menu</div></div></div>)");
+    
     if(outcome == "b") 
     {
-        $("#outcome").append("<div style=\"width: 400px\"> Black Wins!</div>");
+        $("#outcome").text("BLACK WINS!");
     }
     if(outcome == "w") 
     {
-        $("#outcome").append("<div style=\"width: 400px\"> White Wins!</div>");
+        $("#outcome").text("WHITE WINS!");
     }
     if(outcome == "d") 
     {
-        $("#outcome").append("<div style=\"width: 400px\"> Draw!</div>");
+        $("#outcome").text("DRAW!");
     }
-    
-    $(body).append("<div id=\"replay\" style=\"width: 400px\">Replay</div>");
-    $(body).append("<div id=\"main\" style=\"width: 400px\">Main Menu</div>");
-    $('#replay').css("color", "orange");
+ 
+    $('#replay').css("background-color", "orange");
     
     $(window).on("keypress", function(e){
        if(curr_state == "replay")
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#replay').css("color", "");
-                $('#main').css("color", "");
-                $('#replay').css("color", "black");
-                $('#main').css("color", "orange");
+                $('#replay').css("background-color", "");
+                $('#main').css("background-color", "");
+                $('#replay').css("background-color", "gray");
+                $('#main').css("background-color", "orange");
                 curr_state = "main";
             }
             
@@ -1710,7 +1651,6 @@ function endGame(outcome, difficultySetting, playerSetting) {
                 $(window).off("keypress");
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
-                
                 executeGame(difficultySetting,playerSetting);
             }
             
@@ -1720,10 +1660,10 @@ function endGame(outcome, difficultySetting, playerSetting) {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#main').css("color", "");
-                $('#replay').css("color", "");
-                $('#main').css("color", "black");
-                $('#replay').css("color", "orange");
+                $('#main').css("background-color", "");
+                $('#replay').css("background-color", "");
+                $('#main').css("background-color", "gray");
+                $('#replay').css("background-color", "orange");
 
                 curr_state = "replay";
             }
@@ -2152,6 +2092,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
         
         var userMove = function() {
+            turn = game.turn();
             var possibleMoves = game.moves();
 
               // game over
@@ -2171,9 +2112,12 @@ function executeGame(difficultySetting, playerSetting) {
                     $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                     $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                     $(window).off("keypress");
-                    if(game.in_checkmate() === true || game.in_draw() === true){
-                        return;
-                    }
+                    if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                        }
                     else{
                         window.setTimeout(userMove, 500);
                     }
@@ -2199,6 +2143,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
         
         var userMove2 = function() {
+            turn = game.turn();
             var move_state = "move1";
             var possibleMoves = game.moves();
             var randomIndex = 0;
@@ -2242,8 +2187,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove2, 500);
@@ -2266,8 +2214,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove2, 500);
@@ -2297,6 +2248,7 @@ function executeGame(difficultySetting, playerSetting) {
         board = ChessBoard('board', cfg);
     
         var userMove3 = function() {
+            turn = game.turn();
             var move_state = "move1";
             var possibleMoves = game.moves();
             var randomIndex = 0;
@@ -2363,8 +2315,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2389,8 +2344,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2415,8 +2373,11 @@ function executeGame(difficultySetting, playerSetting) {
                         $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
                         $(window).off("keypress");
-                        if(game.in_checkmate() === true || game.in_draw() === true){
-                            return;
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
                         }
                         else{
                             window.setTimeout(userMove3, 500);
@@ -2430,24 +2391,23 @@ function executeGame(difficultySetting, playerSetting) {
        userMove3();
     }
     
->>>>>>> 629e0349ac917337d38ebbe1822560b054d3707c
 };
 
 function executeMainMenu(){
     curr_state = "quickplay";
-    $('#body').append("<div id= \"qplay\"> Quickplay </div>");
-    $('#body').append("<div id=\"settings\"> Settings </div>");
-    $('#qplay').css("color", "orange");
+    $('#body').append("<h1>MAIN MENU</h1><div class = \"quist\"><div id = \"qplay\" class=\"quistlist\">Quick Start</div><div id = \"settings\" class=\"quistlist\">Settings</div></div>");
+    $('#qplay').css("background-color", "orange");
+    $('#settings').css("background-color", "gray");
     
     $(window).on("keypress", function(e){
        if(curr_state == "quickplay")
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#qplay').css("color", "");
-                $('#settings').css("color", "");
-                $('#qplay').css("color", "black");
-                $('#settings').css("color", "orange");
+                $('#qplay').css("background-color", "");
+                $('#settings').css("background-color", "");
+                $('#qplay').css("background-color", "gray");
+                $('#settings').css("background-color", "orange");
                 curr_state = "settings";
             }
             
@@ -2465,10 +2425,10 @@ function executeMainMenu(){
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#qplay').css("color", "");
-                $('#settings').css("color", "");
-                $('#qplay').css("color", "orange");
-                $('#settings').css("color", "black");
+                $('#qplay').css("background-color", "");
+                $('#settings').css("background-color", "");
+                $('#qplay').css("background-color", "orange");
+                $('#settings').css("background-color", "gray");
                 curr_state = "quickplay";
             }
             
@@ -2482,48 +2442,58 @@ function executeMainMenu(){
     }); 
 };
 
+function toggleDropdown(dropdownElement){
+    var ulsettlist = dropdownElement.getElementsByClassName('ulsettlist')
+    if(ulsettlist[0].style.visibility == "visible"){
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "";
+      }
+    }
+    else {
+      for (var i = 0; i < ulsettlist.length; i++){
+        ulsettlist[i].style.visibility = "visible";
+    }
+  }
+}
+
 function executeSettings() {
     curr_state = "dof_1";
     difficulty = -1;
     players = -1;
-    $('#body').append("<div> Degrees of Freedom: </div>");
-    $('#body').append("<div id= \"dof_1\"> 0 DOF </div>");
-    $('#body').append("<div id=\"dof_2\"> 1 DOF </div>");
-    $('#body').append("<div id=\"dof_3\"> 2 DOF </div>");
-    $('#body').append("<div> Players: </div>");
-    $('#body').append("<div id= \"play_1\"> PvC </div>");
-    $('#body').append("<div id=\"play_2\"> PvP </div>");
-    $('#body').append("<div id= \"launch\"> Launch </div>");
-    $('#body').append("<div id=\"reset\"> Reset </div>");
-    $('#dof_1').css("color", "orange");
+    $('#body').append("<h1>SETTINGS</h1><div class=\"dropdown\"><div><button class = \"dropbtn\">Difficulty</button><button class = \"dropbtn\"> Player Select </button></div><table><tr><td><div class = \"ulsett\"><div id= \"dof_1\" class=\"ulsettlist\">One</div><div id=\"dof_2\" class=\"ulsettlist\">Two</div><div id=\"dof_3\" class=\"ulsettlist\">Three</div><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div id= \"play_1\" class=\"ulsettlist\">Player vs. Comp</div><div id=\"play_2\" class=\"ulsettlist\">Player vs. Player</div><div class=\"clearboth\"></div></div></td></tr></table></div><div class = \"title\"><div id = \"reset\" class=\"titlelist\">Reset</div><div id = \"launch\" class=\"titlelist\">Launch</div></div>");
+    toggleDropdown(document.getElementsByClassName('ulsett')[0]);
+    toggleDropdown(document.getElementsByClassName('ulsett')[1]);
+    $('#dof_1').css("background-color", "orange");
+    $('#launch').css("background-color", "gray");
+    $('#reset').css("background-color", "gray");
 
     
     $(window).on("keypress", function(e){
-       if(curr_state == "dof_1")
+        if(curr_state == "dof_1")
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "black");
-                $('#dof_2').css("color", "orange");
-                $('#dof_3').css("color", "black");
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "gray");
+                $('#dof_2').css("background-color", "orange");
+                $('#dof_3').css("background-color", "gray");
                 curr_state = "dof_2";
             }
             
             else if (e.which == 13)
             {
                 difficulty = 0;
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "orangered");
-                $('#dof_2').css("color", "black");
-                $('#dof_3').css("color", "black");
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "orangered");
+                $('#dof_2').css("background-color", "gray");
+                $('#dof_3').css("background-color", "gray");
                 curr_state = "play_1";
-                $('#play_1').css("color", "");
-                $('#play_1').css("color", "orange");
+                $('#play_1').css("background-color", "");
+                $('#play_1').css("background-color", "orange");
             }
             
         } 
@@ -2532,27 +2502,27 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "black");
-                $('#dof_2').css("color", "black");
-                $('#dof_3').css("color", "orange");
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "gray");
+                $('#dof_2').css("background-color", "gray");
+                $('#dof_3').css("background-color", "orange");
                 curr_state = "dof_3";
             }
             
             else if (e.which == 13)
             {
                 difficulty = 1;
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "black");
-                $('#dof_2').css("color", "orangered");
-                $('#dof_3').css("color", "black");   
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "gray");
+                $('#dof_2').css("background-color", "orangered");
+                $('#dof_3').css("background-color", "gray");   
                 curr_state = "play_1";
-                $('#play_1').css("color", "");
-                $('#play_1').css("color", "orange");
+                $('#play_1').css("background-color", "");
+                $('#play_1').css("background-color", "orange");
             }
         } 
         
@@ -2560,27 +2530,27 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "orange");
-                $('#dof_2').css("color", "black");
-                $('#dof_3').css("color", "black");
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "orange");
+                $('#dof_2').css("background-color", "gray");
+                $('#dof_3').css("background-color", "gray");
                 curr_state = "dof_1";
             }
             
             else if (e.which == 13)
             {
                 difficulty = 2;
-                $('#dof_1').css("color", "");
-                $('#dof_2').css("color", "");
-                $('#dof_3').css("color", "");
-                $('#dof_1').css("color", "black");
-                $('#dof_2').css("color", "black");
-                $('#dof_3').css("color", "orangered");  
+                $('#dof_1').css("background-color", "");
+                $('#dof_2').css("background-color", "");
+                $('#dof_3').css("background-color", "");
+                $('#dof_1').css("background-color", "gray");
+                $('#dof_2').css("background-color", "gray");
+                $('#dof_3').css("background-color", "orangered");  
                 curr_state = "play_1";
-                $('#play_1').css("color", "");
-                $('#play_1').css("color", "orange");
+                $('#play_1').css("background-color", "");
+                $('#play_1').css("background-color", "orange");
 
                 
 
@@ -2591,23 +2561,23 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#play_1').css("color", "");
-                $('#play_2').css("color", "");
-                $('#play_1').css("color", "black");
-                $('#play_2').css("color", "orange");
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_1').css("background-color", "gray");
+                $('#play_2').css("background-color", "orange");
                 curr_state = "play_2";
             }
             
             else if (e.which == 13)
             {
                 players = 1;
-                $('#play_1').css("color", "");
-                $('#play_2').css("color", "");
-                $('#play_1').css("color", "orangered");
-                $('#play_2').css("color", "black"); 
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_1').css("background-color", "orangered");
+                $('#play_2').css("background-color", "gray"); 
                 curr_state = "launch";
-                $('#launch').css("color", "");
-                $('#launch').css("color", "orange");
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
             }
         }
         
@@ -2615,23 +2585,23 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#play_1').css("color", "");
-                $('#play_2').css("color", "");
-                $('#play_1').css("color", "orange");
-                $('#play_2').css("color", "black");
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_1').css("background-color", "orange");
+                $('#play_2').css("background-color", "gray");
                 curr_state = "play_1";
             }
             
             else if (e.which == 13)
             {
                 players = 2;
-                $('#play_1').css("color", "");
-                $('#play_2').css("color", "");
-                $('#play_1').css("color", "black");
-                $('#play_2').css("color", "orangered"); 
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_1').css("background-color", "gray");
+                $('#play_2').css("background-color", "orangered"); 
                 curr_state = "launch";
-                $('#launch').css("color", "");
-                $('#launch').css("color", "orange");
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
             }
         }
         
@@ -2639,10 +2609,10 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#launch').css("color", "");
-                $('#reset').css("color", "");
-                $('#launch').css("color", "black");
-                $('#reset').css("color", "orange");
+                $('#launch').css("background-color", "");
+                $('#reset').css("background-color", "");
+                $('#launch').css("background-color", "gray");
+                $('#reset').css("background-color", "orange");
                 curr_state = "reset";
             }
             
@@ -2659,10 +2629,10 @@ function executeSettings() {
         {
             if(e.which == 0 || e.which == 32) 
             {
-                $('#launch').css("color", "");
-                $('#reset').css("color", "");
-                $('#launch').css("color", "orange");
-                $('#reset').css("color", "black");
+                $('#launch').css("background-color", "");
+                $('#reset').css("background-color", "");
+                $('#launch').css("background-color", "orange");
+                $('#reset').css("background-color", "gray");
                 curr_state = "launch";
             }
             
@@ -2677,9 +2647,5 @@ function executeSettings() {
 }
 
 $(document).ready(function () {
-    executeMainMenu(0,0);
+    executeMainMenu();
 });
-<<<<<<< HEAD
-
-=======
->>>>>>> 629e0349ac917337d38ebbe1822560b054d3707c
