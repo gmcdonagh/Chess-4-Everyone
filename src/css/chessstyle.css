@@ -85,9 +85,9 @@ div.textbox {
 }
 input[type="text"] {
   border: 1px solid #FFFFFF;
-  font-size: 26px;
+  font-size: 16px;
   padding: 20px;
-  width: 300px;
+  width: 500px;
 }
 body {
   background-color: #333333;
