@@ -28,25 +28,29 @@
    <h1>SETTINGS</h1>
    <div class="dropdown">
     <div>
-    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[0]);">Difficulty</button>
-    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[1]);"> Player Select </button>
-    <button class ="dropbtn2">Load Game</button>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[0]);"> Player Select </button>
+    <button class = "dropbtn" onclick="toggleDropdown(document.getElementsByClassName('ulsett')[1]);"> Difficulty </button>
     <button class="dropbtn2">Default Settings</button>
     <button class="dropbtn2">Start</button>
+    <button class ="dropbtn2">Load Game</button>
   </div>
-  <table><tr><td>
+  <table><tr>
+    <td>
+        <div class = "ulsett">
+        <div class="ulsettlist">PI vs Comp</div>
+        <div class="ulsettlist">PI vs. PI</div>
+        <div class="ulsettlist">PI vs. PN</div>
+        <div class="ulsettlist">PN vs. Comp</div>
+        <div class="ulsettlist">PN vs. PN</div>
+        <div class="clearboth"></div>
+      </div>
+    </td><td>
     <div class = "ulsett">
         <div class="ulsettlist">One</div>
         <div class="ulsettlist">Two</div>
         <div class="ulsettlist">Three</div>
         <div class="clearboth"></div>
       </div>
-  </td><td>
-      <div class = "ulsett">
-      <div class="ulsettlist">Player vs. Comp</div>
-      <div class="ulsettlist">Player vs. Player</div>
-      <div class="clearboth"></div>
-    </div>
   </td>
   <td>
       <div class = "ulsett">
@@ -54,6 +58,11 @@
     </div>
   </td>
 
+  <td>
+      <div class = "ulsett">
+      <div class="clearboth"></div>
+    </div>
+  </td>
   <td>
       <div class = "ulsett">
       <div class="clearboth"></div>
