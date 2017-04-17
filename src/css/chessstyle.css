@@ -1,6 +1,25 @@
 *{
-  font-family:"Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
+
+  font-family: "Comic Sans", "Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
 }
+.quist {
+  text-align: center;
+  color: white;
+}
+.quistlist {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin: 0;
+  border-radius: 12px;
+}
+.quistlist:last-child {
+  border-right: none;
+}
+/*
 div.quist {
   text-align: center;
   color: white;
@@ -17,41 +36,83 @@ div.quistlist {
   border-radius: 12px;
 }
 div.quistlist:last-child {
+
     border-right: none;
 }
-div.ulsett {
+*/
+.restartandsave {
+  text-align: center;
+  color: white;
+}
+.save {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin: 0;
+  border-radius: 12px;
+}
+.save:last-child {
+  border-right: none;
+}
+.restart {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin: 0;
+  border-radius: 12px;
+}
+.restart:last-child {
+  border-right: none;
+}
+.ulsett {
   display: inline-block;
   width: 200px;
   margin-bottom: -4px;
 	padding: 0;
 }
-div.ulsettlist {
-  background-color: grey;
+.ulsettlist {
+  background-color: #90C3D4;
   width: 100%;
   color: white;
   text-align: center;
   padding: 12px 16px;
   box-sizing: border-box;
   font-size: 16px;
-  border-bottom: 2px solid #1B8FB5;
   margin-bottom: 2px;
   border-radius: 12px;
   visibility: hidden;
 }
-div.ulsettlist{
+.ulsettlist{
   float:left;
 }
-div.clearboth {
+.clearboth {
   clear:both;
 }
-div.title {
+
+table {
+  margin:auto;
+}
+
+
+.title {
   display: inline-block;
   padding: 16px;
   align-items: center;
   justify-content: center;
+
+}
+.titlelist {
+
   float:right;
 }
-div.titlelist {
+.titlelist {
+
   display: inline-block;
   padding: 16px;
   margin-left: 4px;
@@ -63,7 +124,18 @@ div.titlelist {
   text-align: center;
   border-radius: 12px;
 }
-button.dropbtn {
+.dropbtn {
+    display: inline-block;
+    width: 200px;
+    background-color: grey;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+.dropbtn2 {
     display: inline-block;
     width: 200px;
     background-color: #90C3D4;
@@ -74,9 +146,23 @@ button.dropbtn {
     border: none;
     cursor: pointer;
 }
-div.dropdown {
-    position: absolute;
-    display: inline-block;
+.dropdown {
+    text-align: center;
+}
+.textbox {
+  border: 1px solid #FFFFFF;
+  padding: 10px;
+  width: 200px;
+}
+input[type="text"] {
+  border: 1px solid #FFFFFF;
+  font-size: 16px;
+  padding: 16px;
+  width: 500px;
+  margin-top: -23px;
+  margin-left: -250px;
+  position: absolute;
+  display: inline-block;
 }
 body {
   background-color: #333333;
@@ -88,4 +174,82 @@ h1{
 }
 td {
   vertical-align: top;
+}
+
+p {
+  text-align: center;
+  font-size: 26px;
+  color: white;
+}
+.endgamelist {
+  background-color: #90C3D4;
+  color: white;
+  text-align: center;
+  width: 200px;
+  font-size: 26px;
+  padding: 16px;
+  margin-top: 50px;
+  border-radius: 12px;
+}
+.endgamelist:last-child {
+  border-right: none;
+}
+.whitewins {
+  background-color: #C3A3E6;
+  /*position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
+  */
+  color: white;
+  text-align: center;
+  font-size: 36px;
+  padding: 56px 0px;
+  border-radius: 12px;
+}
+.blackwins {
+  background-color: #49eb74;
+  /*position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
+  */
+  color: black;
+  text-align: center;
+  font-size: 36px;
+  padding: 56px 0px;
+  border-radius: 12px;
+}
+.draw {
+  background-color: #42706c;
+  /*position:fixed;
+  top:50%;
+  left:0px;
+  width:100%;
+  margin-top:-62px;
+  */
+  color: white;
+  text-align: center;
+  font-size: 36px;
+  padding: 56px 0px;
+  border-radius: 12px;
+}
+.load {
+  text-align: center;
+  color: white;
+}
+.loadlist {
+    background-color: #90C3D4;
+    color: white;
+    text-align: center;
+    width: 200px;
+    font-size: 26px;
+    padding: 16px;
+    margin: 0;
+    border-radius: 12px;
+  }
+.loadlist:last-child {
+  border-right: none;
 }
