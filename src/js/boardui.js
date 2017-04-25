@@ -12,6 +12,7 @@ var g_analyzing = false;
 var g_uiBoard;
 var g_cellSize = 45;
 var finalData = "default";
+var haschanged = 0;
 
 function UINewGame() {
     moveNumber = 1;
@@ -415,6 +416,7 @@ function RedrawBoard() {
 }
 function set_final(new_move) {
     //alert(new_move);
+    haschanged = 1;
     finalData = new_move;
 }
 function get_final() {
@@ -433,6 +435,42 @@ function get_move(fen) {
       moveOutput = finalData.substring(4);
       return moveOutput;
     }, 2000);
+}
+
+function call_this(fen) {
+  haschanged = 0;
+  let myFirstPromise = new Promise(function (resolve, reject) {
+    if (haschanged==1) {
+      setTimeout(function(){
+        //alert(get_final());
+        resolve(get_final());
+      }, 1000);
+      //resolve(get_final()); // fulfilled
+    } else {
+      var reason = new Error('mom is not happy');
+      reject(reason); // reject
+    }
+
+  });
+
+    var run = function () {
+      myFirstPromise
+      .then(function (fulfilled) {
+        // yay, you got a new phone
+        var final = get_final();
+        //
+        //alert(final);
+        console.log(final);
+        // output: { brand: 'Samsung', color: 'black' }
+      })
+      .catch(function (error) {
+        // oops, mom don't buy it
+        console.log(error.message);
+        // output: 'mom is not happy'
+      });
+    };
+    get_move(fen);
+    return run();
 }
 
 function evaluatePosition(game) {
