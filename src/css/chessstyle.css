@@ -256,7 +256,13 @@ p {
   border-right: none;
 }
 .p1 {
+  position: absolute;
+  top:50%;
+  left:50%;
+  margin-top: 0px;
+  margin-left:325px;
   direction: rtl;
+  text-align: center;
   font-size: 16px;
   color: white;
 }
