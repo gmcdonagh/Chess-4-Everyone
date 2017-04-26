@@ -156,11 +156,13 @@ table {
 }
 input[type="text"] {
   border: 1px solid #FFFFFF;
-  font-size: 16px;
-  padding: 16px;
-  width: 500px;
+  font-size: 12px;
+  padding: 7px;
+  width: 392px;
   margin-top: -23px;
-  margin-left: -250px;
+  margin-left: -196px;
+  text-align: center;
+  box-sizing:border-box;
   position: absolute;
   display: inline-block;
 }
@@ -252,4 +254,12 @@ p {
   }
 .loadlist:last-child {
   border-right: none;
+}
+.p1 {
+  direction: rtl;
+  font-size: 16px;
+  color: white;
+}
+#fenmessage{
+  position:absolute;top:50%;left:0px;margin-top:-300px;width:100%;text-align:center;
 }
