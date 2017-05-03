@@ -3418,7 +3418,7 @@ function executeGame(difficultySetting, playerSetting, fen) {
 
 function executeLoadGame(difficulty, players) {
     curr_state = "load";
-    $('#body').append("<h1>LOAD GAME</h1><div class=\"load\"><p>Enter FEN string into the textbox to resume your game: </p><input id = \"box\" type=\"text\"> <br><br><div><button id = \"load\" class=\"loadlist\">Load Game</button><button id = \"main\" class=\"loadlist\">Main Menu</button></div></div><br><br><br><br><br><br><p id = \"error\" ><p>");
+    $('#body').append("<h1>LOAD GAME</h1><div class=\"load\"><p>Enter FEN string into the textbox to resume your game: </p> <br><input id = \"box\" type=\"text\"> <br><br><div><button id = \"load\" class=\"loadlist\">Load Game</button><button id = \"main\" class=\"loadlist\">Main Menu</button></div></div><br><br><br><br><br><br><p id = \"error\"><p>");    
     $('#load').css("background-color", "orange");
     $(document).keydown(function(e){
         if(curr_state == "load")
