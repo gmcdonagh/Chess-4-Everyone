@@ -193,6 +193,7 @@ p {
   font-size: 26px;
   padding: 16px;
   margin-top: 50px;
+  margin: 3px;
   border-radius: 12px;
 }
 .endgamelist:last-child {
@@ -251,7 +252,7 @@ p {
     width: 200px;
     font-size: 26px;
     padding: 16px;
-    margin: 0;
+    margin: 3px;
     border-radius: 12px;
   }
 .loadlist:last-child {
