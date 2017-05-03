@@ -84,8 +84,7 @@ div.quistlist:last-child {
   padding: 12px 16px;
   box-sizing: border-box;
   font-size: 16px;
-  margin-bottom: 2px;
-  margin: 2px;
+  margin-bottom: 4px;
   border-radius: 12px;
   visibility: hidden;
 }
