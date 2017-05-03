@@ -17,12 +17,10 @@
 .board-b72b1 {
   position: absolute;
   top: 50%;
-  left: 0px;
-  margin-top: -10%;
-  margin-left: 32%;
-  width: 100%;
+  left: 50%;
+  margin-top: -196px;
+  margin-left: -196px;
   text-align: center;
-  height: 80%;
   border: 2px solid #404040;
   -moz-box-sizing: content-box;
   box-sizing: content-box;
