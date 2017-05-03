@@ -85,6 +85,7 @@ div.quistlist:last-child {
   box-sizing: border-box;
   font-size: 16px;
   margin-bottom: 2px;
+  margin: 2px;
   border-radius: 12px;
   visibility: hidden;
 }
