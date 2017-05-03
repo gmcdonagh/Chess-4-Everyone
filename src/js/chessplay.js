@@ -1234,7 +1234,7 @@ var Chess = function(fen) {
     },
 
     in_draw: function() {
-      return half_moves >= 100 ||
+      return half_moves >= 200 ||
              in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
@@ -1608,6 +1608,9 @@ var Chess = function(fen) {
   };
 };
 
+
+// BEGIN OUR CODE
+
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -1617,38 +1620,39 @@ function getRandomInt(min, max) {
 function endGame(outcome, difficultySetting, playerSetting) {
     curr_state = "replay";
     $(body).empty();
-    $(body).append("<h1 id = \"outcome\"></h1><div class = \"quist\"><div><div id = \"replay\"class=\"quistlist\">Replay</div><div id = \"main\" class=\"quistlist\">Main Menu</div></div></div>)");
-    
+    $(document).off("keydown");
+    $(window).off("keydown");
+
     if(outcome == "b") 
     {
-        $("#outcome").text("BLACK WINS!");
+        $(body).append("<div class =\"blackwins\">BLACK WINS! <img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div class = \"quist\"><div><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
-    if(outcome == "w") 
+    else if(outcome == "w") 
     {
-        $("#outcome").text("WHITE WINS!");
+        $(body).append("<div class = \"quist\"><div class =\"whitewins\">WHITE WINS! <img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\"></div><div><button id =\"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
-    if(outcome == "d") 
+    else if(outcome == "d") 
     {
-        $("#outcome").text("DRAW!");
+        $(body).append("<div class = \"quist\"><div class =\"draw\"><img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\">DRAW!<img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
  
     $('#replay').css("background-color", "orange");
     
-    $(window).on("keypress", function(e){
+    $(document).keydown(function(e){
        if(curr_state == "replay")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37)
             {
                 $('#replay').css("background-color", "");
                 $('#main').css("background-color", "");
-                $('#replay').css("background-color", "gray");
+                $('#replay').css("background-color", "#90C3D4");
                 $('#main').css("background-color", "orange");
                 curr_state = "main";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
-                $(window).off("keypress");
+                $(document).off("keydown");
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
                 executeGame(difficultySetting,playerSetting);
@@ -1658,30 +1662,30 @@ function endGame(outcome, difficultySetting, playerSetting) {
         
         else if (curr_state == "main")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#main').css("background-color", "");
                 $('#replay').css("background-color", "");
-                $('#main').css("background-color", "gray");
+                $('#main').css("background-color", "#90C3D4");
                 $('#replay').css("background-color", "orange");
 
                 curr_state = "replay";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
-                $(window).off("keypress");
+                $(document).off("keydown");
                 $(body).empty();
                 executeMainMenu();
             }
         } 
-    }); 
-
-    
+    });  
 }
 
 
-function executeGame(difficultySetting, playerSetting) {
+function executeGame(difficultySetting, playerSetting, fen) {
+    
+    $('#body').append("<div class=\"p1\"><p1>Press R to restart the game. Press S to save the game</p1> <div></div></div>");
     if(playerSetting == 1 && difficultySetting == 0)
     {      
         var cfg = {
@@ -1693,7 +1697,7 @@ function executeGame(difficultySetting, playerSetting) {
         };
 
         var game = new Chess();
-
+        
         board = ChessBoard('board', cfg);
         
         var aiMove = function() {
@@ -1701,6 +1705,7 @@ function executeGame(difficultySetting, playerSetting) {
             var possibleMoves = game.moves();
             var randomIndex = Math.floor(Math.random() * possibleMoves.length);
             var sanmove1 = possibleMoves[randomIndex];
+            str = sanmove1;
             var objmove1 = game.sanTransform(sanmove1);
             objmove1.promotion = 'q';
             game.move(objmove1);
@@ -1708,7 +1713,7 @@ function executeGame(difficultySetting, playerSetting) {
             if(game.in_checkmate() === true){
                 endGame(turn, difficultySetting, playerSetting);
             }
-            if(game.in_draw() === true) {
+            else if(game.in_draw() === true) {
                 endGame("d", difficultySetting, playerSetting);
             }
             else{
@@ -1719,45 +1724,72 @@ function executeGame(difficultySetting, playerSetting) {
         
         var userMove = function() {
             turn = game.turn();
-            var possibleMoves = game.moves();
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function(){
+                sanmove1 = get_final();
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
 
-              // game over
-            if (possibleMoves.length === 0) return;
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
+                    }
 
-            var randomIndex = Math.floor(Math.random() * possibleMoves.length);
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
 
-            $(window).on("keypress", function(e){
-                if(e.which == 13) {
-                    game.move(objmove1);
-                    board.position(game.fen());
-                    $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                    $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                    $(window).off("keypress");
-                    if(game.in_checkmate() === true){
-                        window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
                     }
-                    if(game.in_draw() === true) {
-                        window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+
+                    if(e.which == 13 || e.which == 39) {
+                        $("#fenmessage").remove();
+                        game.move(objmove1);
+                        board.position(game.fen());
+                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                        $(document).off("keydown");
+                        if(game.in_checkmate() === true){
+                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                        }
+                        else if(game.in_draw() === true) {
+                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                        }
+                        else{
+                            window.setTimeout(aiMove, 500);
+                        }
                     }
-                    else{
-                        window.setTimeout(aiMove, 500);
-                    }
-                }
-            });
+                
+                });
+            }, 2000);
+                
+            
         };
         
-       var chance = getRandomInt(1,3);
-       if (chance == 1){
-           window.setTimeout(aiMove, 500);
-       }
-       else {
-           window.setTimeout(userMove, 500);
+        if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(aiMove, 500);
+            }
+            else {
+            window.setTimeout(userMove, 500);
+            }  
         }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove, 500);
+        }
+       
     }
     
     if(playerSetting == 1 && difficultySetting == 1)
@@ -1786,7 +1818,7 @@ function executeGame(difficultySetting, playerSetting) {
             if(game.in_checkmate() === true){
                 window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
             }
-            if(game.in_draw() === true) {
+            else if(game.in_draw() === true) {
                 window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
             }
             else{
@@ -1798,96 +1830,136 @@ function executeGame(difficultySetting, playerSetting) {
         var userMove2 = function() {
             turn = game.turn();
             var move_state = "move1";
+            var f = game.fen();
             var possibleMoves = game.moves();
             var randomIndex = 0;
-            var randomIndex2 = 0;
-
-              // game over
-            if (possibleMoves.length === 0) return;
-            if(possibleMoves.length == 1) {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = randomIndex;
-            }
-            else {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex2 == randomIndex) {
-                    randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1)
+                {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
                 }
-            }
-            
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            var sanmove2 = possibleMoves[randomIndex2];
-            var objmove2 = game.sanTransform(sanmove2);
-            objmove2.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-            $(window).on("keypress", function(e){
-                if(move_state == "move1") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
-                        move_state = "move2";
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    var tempmove2 = possibleMoves[randomIndex];
+                    while (tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        var tempmove2 = possibleMoves[randomIndex];
                     }
-
-                    else if(e.which == 13) {
-                        game.move(objmove1);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(aiMove2, 500);
-                        }
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
                     }
                 }
                 
-                else {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-                        move_state = "move1";
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
                     }
 
-                    else if(e.which == 13) {
-                        game.move(objmove2);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
                         }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(aiMove2, 500);
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(aiMove2, 500);
+                            }
                         }
                     }
-                }
-                
-            });
+
+                    else {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(aiMove2, 500);
+                            }
+                        }
+                    }
+                });
+            }, 2000); 
         };
         
-       var chance = getRandomInt(1,3);
-       if (chance == 1){
-           window.setTimeout(aiMove2, 500);
-       }
-       else {
-           window.setTimeout(userMove2, 500);
+       if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(aiMove2, 500);
+            }
+            else {
+            window.setTimeout(userMove2, 500);
+            }  
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove2, 500);
         }
     }
     
@@ -1903,7 +1975,7 @@ function executeGame(difficultySetting, playerSetting) {
 
         var game = new Chess();
 
-        board = ChessBoard('board', cfg);
+        board = ChessBoard('board', cfg);    
         
         var aiMove3 = function() {
             turn = game.turn();
@@ -1917,7 +1989,7 @@ function executeGame(difficultySetting, playerSetting) {
             if(game.in_checkmate() === true){
                     window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
             }
-            if(game.in_draw() === true) {
+            else if(game.in_draw() === true) {
                     window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
             }
             else{
@@ -1932,147 +2004,216 @@ function executeGame(difficultySetting, playerSetting) {
             var possibleMoves = game.moves();
             var randomIndex = 0;
             var randomIndex2 = 0;
-            var randomIndex3 = 0;
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1) {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
+                    sanmove3 = tempmove1;
+                }
+                
+                else if (possibleMoves.length == 2){
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while (tempmove2 == tempmove1) {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
+                    }
 
-              // game over
-            if (possibleMoves.length === 0) return;
-            if(possibleMoves.length == 1) {
-                randomIndex = 0;
-                randomIndex2 = 0;
-                randomIndex3 = 0;
-            }
-            
-            else if(possibleMoves.length == 2) {
-                randomIndex = 0;
-                randomIndex2 = 1;
-                randomIndex3 = 0;
-            }
-            
-            else if(possibleMoves.length == 3) {
-                randomIndex = 0;
-                randomIndex2 = 1;
-                randomIndex3 = 2;
-            }
-            else {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex2 == randomIndex) {
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove1;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }
+                }
+                
+                
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while(tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
+                    }
                     randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove3 = possibleMoves[randomIndex2]
+                    while(tempmove3 == tempmove1 || tempmove3 == tempmove2)
+                    {
+                        randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove3 = possibleMoves[randomIndex2]
+                    }
+                    
+                    var chance = getRandomInt(1,4);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 2)
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 3)
+                    {
+                        sanmove1 = tempmove3;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }    
                 }
-                randomIndex3 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex3 == randomIndex || randomIndex3 == randomIndex2) {
-                    randomIndex3 = Math.floor(Math.random() * possibleMoves.length);
-                }
-            }
             
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            var sanmove2 = possibleMoves[randomIndex2];
-            var objmove2 = game.sanTransform(sanmove2);
-            objmove2.promotion = 'q';
-            var sanmove3 = possibleMoves[randomIndex3];
-            var objmove3 = game.sanTransform(sanmove3);
-            objmove3.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-            $(window).on("keypress", function(e){
-                if(move_state == "move1") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
-                        move_state = "move2";
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                var objmove3 = game.sanTransform(sanmove3);
+                objmove3.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
                     }
 
-                    else if(e.which == 13) {
-                        game.move(objmove1);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(aiMove3, 500);
-                        }
-                    }
-                }
-                
-                else if(move_state == "move2") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).addClass('highlight-black');
-                        move_state = "move3";
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
                     }
 
-                    else if(e.which == 13) {
-                        game.move(objmove2);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
                         }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(aiMove3, 500);
+                            }
                         }
-                        else{
-                            window.setTimeout(aiMove3, 500);
-                        }
-                    }
-                }
-                
-                else if(move_state == "move3") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-                        move_state = "move1";
                     }
 
-                    else if(e.which == 13) {
-                        game.move(objmove3);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                    else if(move_state == "move2") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).addClass('highlight-black');
+                            move_state = "move3";
                         }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(aiMove3, 500);
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(aiMove3, 500);
+                            }
                         }
                     }
-                }
-                
-            });
+
+                    else if(move_state == "move3") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove3);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(aiMove3, 500);
+                            }
+                        }
+                    }
+
+                });  
+            }, 2000);
         };
         
        var chance = getRandomInt(1,3);
-       if (chance == 1){
-           window.setTimeout(aiMove3, 500);
-       }
-       else {
-           window.setTimeout(userMove3, 500);
+       if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(aiMove3, 500);
+            }
+            else {
+            window.setTimeout(userMove3, 500);
+            }  
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove3, 500);
         }
         
     }
@@ -2091,41 +2232,63 @@ function executeGame(difficultySetting, playerSetting) {
 
         board = ChessBoard('board', cfg);
         
-        var userMove = function() {
+        var userMove4 = function() {
             turn = game.turn();
-            var possibleMoves = game.moves();
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function(){
+                var sanmove1 = get_final();
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
 
-              // game over
-            if (possibleMoves.length === 0) return;
-
-            var randomIndex = Math.floor(Math.random() * possibleMoves.length);
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-
-            $(window).on("keypress", function(e){
-                if(e.which == 13) {
-                    game.move(objmove1);
-                    board.position(game.fen());
-                    $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                    $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                    $(window).off("keypress");
-                    if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                    else{
-                        window.setTimeout(userMove, 500);
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
                     }
-                }
-            });
+
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(e.which == 13 || e.which == 39) {
+                        $("#fenmessage").remove();
+                        game.move(objmove1);
+                        board.position(game.fen());
+                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                        $(document).off("keydown");
+                        if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                        else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                        else{
+                            window.setTimeout(userMove4, 500);
+                        }
+                    }
+                });
+            }, 2000);
         };
         
-       userMove()
+       if(fen == undefined)
+        {
+            window.setTimeout(userMove4, 500);  
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove4, 500);
+        }
     }
     
     if(difficultySetting == 1 && playerSetting == 2)
@@ -2142,94 +2305,135 @@ function executeGame(difficultySetting, playerSetting) {
 
         board = ChessBoard('board', cfg);
         
-        var userMove2 = function() {
+        var userMove5 = function() {
             turn = game.turn();
             var move_state = "move1";
+            var f = game.fen();
             var possibleMoves = game.moves();
             var randomIndex = 0;
-            var randomIndex2 = 0;
-
-              // game over
-            if (possibleMoves.length === 0) return;
-            if(possibleMoves.length == 1) {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = randomIndex;
-            }
-            else {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex2 == randomIndex) {
-                    randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1)
+                {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
                 }
-            }
-            
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            var sanmove2 = possibleMoves[randomIndex2];
-            var objmove2 = game.sanTransform(sanmove2);
-            objmove2.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-            $(window).on("keypress", function(e){
-                if(move_state == "move1") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
-                        move_state = "move2";
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    var tempmove2 = possibleMoves[randomIndex];
+                    while (tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        var tempmove2 = possibleMoves[randomIndex];
                     }
-
-                    else if(e.which == 13) {
-                        game.move(objmove1);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(userMove2, 500);
-                        }
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
                     }
                 }
                 
-                else {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-                        move_state = "move1";
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
                     }
 
-                    else if(e.which == 13) {
-                        game.move(objmove2);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
                         }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(userMove2, 500);
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(userMove5, 500);
+                            }
                         }
                     }
-                }
-                
-            });
+
+                    else {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(userMove5, 500);
+                            }
+                        }
+                    }
+                });
+            }, 2000);
         };
         
-       userMove2();
+       if(fen == undefined)
+        {
+            window.setTimeout(userMove5, 500);  
+        }
+        
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove5, 500);
+        }
         
     }
     
@@ -2247,173 +2451,1047 @@ function executeGame(difficultySetting, playerSetting) {
 
         board = ChessBoard('board', cfg);
     
-        var userMove3 = function() {
+        var userMove6 = function() {
             turn = game.turn();
             var move_state = "move1";
             var possibleMoves = game.moves();
             var randomIndex = 0;
             var randomIndex2 = 0;
-            var randomIndex3 = 0;
-
-              // game over
-            if (possibleMoves.length === 0) return;
-            if(possibleMoves.length == 1) {
-                randomIndex = 0;
-                randomIndex2 = 0;
-                randomIndex3 = 0;
-            }
-            
-            else if(possibleMoves.length == 2) {
-                randomIndex = 0;
-                randomIndex2 = 1;
-                randomIndex3 = 0;
-            }
-            
-            else if(possibleMoves.length == 3) {
-                randomIndex = 0;
-                randomIndex2 = 1;
-                randomIndex3 = 2;
-            }
-            else {
-                randomIndex = Math.floor(Math.random() * possibleMoves.length);
-                randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex2 == randomIndex) {
-                    randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1) {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
+                    sanmove3 = tempmove1;
                 }
-                randomIndex3 = Math.floor(Math.random() * possibleMoves.length);
-                while (randomIndex3 == randomIndex || randomIndex3 == randomIndex2) {
-                    randomIndex3 = Math.floor(Math.random() * possibleMoves.length);
-                }
-            }
-            
-            var sanmove1 = possibleMoves[randomIndex];
-            var objmove1 = game.sanTransform(sanmove1);
-            objmove1.promotion = 'q';
-            var sanmove2 = possibleMoves[randomIndex2];
-            var objmove2 = game.sanTransform(sanmove2);
-            objmove2.promotion = 'q';
-            var sanmove3 = possibleMoves[randomIndex3];
-            var objmove3 = game.sanTransform(sanmove3);
-            objmove3.promotion = 'q';
-            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-            $(window).on("keypress", function(e){
-                if(move_state == "move1") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
-                        move_state = "move2";
+                
+                else if (possibleMoves.length == 2){
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while (tempmove2 == tempmove1) {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
                     }
 
-                    else if(e.which == 13) {
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove1;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }
+                }
+                
+                
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while(tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
+                    }
+                    randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove3 = possibleMoves[randomIndex2]
+                    while(tempmove3 == tempmove1 || tempmove3 == tempmove2)
+                    {
+                        randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove3 = possibleMoves[randomIndex2]
+                    }
+                    
+                    var chance = getRandomInt(1,4);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 2)
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 3)
+                    {
+                        sanmove1 = tempmove3;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }    
+                }
+                
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                var objmove3 = game.sanTransform(sanmove3);
+                objmove3.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
+                    }
+
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(userMove6, 500);
+                            }
+                        }
+                    }
+
+                    else if(move_state == "move2") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).addClass('highlight-black');
+                            move_state = "move3";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(userMove6, 500);
+                            }
+                        }
+                    }
+
+                    else if(move_state == "move3") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove3);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                window.setTimeout(userMove6, 500);
+                            }
+                        }
+                    }
+                });
+            }, 2000);
+        };
+        
+       if(fen == undefined)
+        {
+            window.setTimeout(userMove6, 500);  
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove6, 500);
+        }
+    }
+    
+    if(difficultySetting == 0 && playerSetting == 3)
+    {
+        var onSnapEnd = function() {
+            board.position(game.fen());
+        };
+        
+        var onDrop = function(source, target) {
+            turn = game.turn();
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
+
+            // illegal move
+            if (move === null) 
+            {
+                return 'snapback';
+            }
+            else
+            {
+                if(game.in_checkmate() === true){
+                    window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                }
+                else if(game.in_draw() === true) {
+                    window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                }
+                else
+                {
+                    window.setTimeout(userMove7, 500);
+                }
+            }
+
+        };
+        
+        var cfg = {
+          draggable: true,
+          position: 'start',
+          onDragStart: function(){},
+          onDrop: onDrop,
+          onSnapEnd: onSnapEnd
+        };
+
+        var game = new Chess();
+
+        board = ChessBoard('board', cfg);
+        
+        var userMove7 = function() {
+            cfg.draggable = false;
+            turn = game.turn();
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function(){
+                var sanmove1 = get_final();
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
+                    }
+
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(e.which == 13 || e.which == 39) {
+                        $("#fenmessage").remove();
                         game.move(objmove1);
                         board.position(game.fen());
                         $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
                         $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $(window).off("keypress");
+                        $(document).off("keydown");
                         if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                        else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
                         else{
-                            window.setTimeout(userMove3, 500);
+                            cfg.draggable = true;
                         }
                     }
-                }
-                
-                else if(move_state == "move2") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).addClass('highlight-black');
-                        move_state = "move3";
-                    }
-
-                    else if(e.which == 13) {
-                        game.move(objmove2);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(userMove3, 500);
-                        }
-                    }
-                }
-                
-                else if(move_state == "move3") {
-                    if(e.which == 0 || e.which == 32) {
-                        $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
-                        $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
-                        move_state = "move1";
-                    }
-
-                    else if(e.which == 13) {
-                        game.move(objmove3);
-                        board.position(game.fen());
-                        $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
-                        $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
-                        $(window).off("keypress");
-                        if(game.in_checkmate() === true){
-                            window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
-                        }
-                        if(game.in_draw() === true) {
-                            window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
-                        }
-                        else{
-                            window.setTimeout(userMove3, 500);
-                        }
-                    }
-                }
-                
-            });
+                });
+            },2000);
         };
         
-       userMove3();
+       if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(userMove7, 500);
+            }
+            else
+            {
+                //pass
+            }
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove7, 500);
+        }
     }
     
+    if(difficultySetting == 1 && playerSetting == 3)
+    {
+        var onSnapEnd = function() {
+            board.position(game.fen());
+        };
+        
+        var onDrop = function(source, target) {
+            turn = game.turn();
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
+
+            // illegal move
+            if (move === null) 
+            {
+                return 'snapback';
+            }
+            else
+            {
+               if(game.in_checkmate() === true){
+                    window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                }
+                else if(game.in_draw() === true) {
+                    window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                }
+                else
+                {
+                    window.setTimeout(userMove8, 500);
+                }
+            }
+
+        };
+        
+        var cfg = {
+          draggable: true,
+          position: 'start',
+          onDragStart: function(){},
+          onDrop: onDrop,
+          onSnapEnd: onSnapEnd
+        };
+
+        var game = new Chess();
+
+        board = ChessBoard('board', cfg);
+        
+        var userMove8 = function() {
+            cfg.draggable = false;
+            turn = game.turn();
+            var move_state = "move1";
+            var f = game.fen();
+            var possibleMoves = game.moves();
+            var randomIndex = 0;
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1)
+                {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
+                }
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    var tempmove2 = possibleMoves[randomIndex];
+                    while (tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        var tempmove2 = possibleMoves[randomIndex];
+                    }
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                    }
+                }
+            
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
+                    }
+
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                cfg.draggable = true;
+                            }
+                        }
+                    }
+
+                    else {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                cfg.draggable = true;
+                            }
+                        }
+                    }
+                });
+            },2000);
+        };
+        
+       if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(userMove8, 500);
+            }
+            else
+            {
+                //pass
+            }
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove8, 500);
+        }
+    }
+    
+    if(difficultySetting == 2 && playerSetting == 3)
+    {
+        var onSnapEnd = function() {
+            board.position(game.fen());
+        };
+        
+        var onDrop = function(source, target) {
+            turn = game.turn();
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
+
+            // illegal move
+            if (move === null) 
+            {
+                return 'snapback';
+            }
+            else
+            {
+               if(game.in_checkmate() === true){
+                    window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                }
+                else if(game.in_draw() === true) {
+                    window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                }
+                else
+                {
+                    window.setTimeout(userMove9, 500);
+                }
+            }
+
+        };
+        
+        var cfg = {
+          draggable: true,
+          position: 'start',
+          onDragStart: function(){},
+          onDrop: onDrop,
+          onSnapEnd: onSnapEnd
+        };
+
+        var game = new Chess();
+
+        board = ChessBoard('board', cfg);
+        
+        var userMove9 = function() {
+            cfg.draggable = false;
+            turn = game.turn();
+            var move_state = "move1";
+            var possibleMoves = game.moves();
+            var randomIndex = 0;
+            var randomIndex2 = 0;
+            var f = game.fen();
+            call_this(f);
+            setTimeout(function() {
+                var tempmove1 = get_final();
+                if(possibleMoves.length == 1) {
+                    sanmove1 = tempmove1;
+                    sanmove2 = tempmove1;
+                    sanmove3 = tempmove1;
+                }
+                
+                else if (possibleMoves.length == 2){
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while (tempmove2 == tempmove1) {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
+                    }
+
+                    var chance = getRandomInt(1,3);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove1;
+                    }
+                    
+                    else
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }
+                }
+                
+                
+                else
+                {
+                    randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove2 = possibleMoves[randomIndex]
+                    while(tempmove2 == tempmove1)
+                    {
+                        randomIndex = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove2 = possibleMoves[randomIndex]
+                    }
+                    randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                    tempmove3 = possibleMoves[randomIndex2]
+                    while(tempmove3 == tempmove1 || tempmove3 == tempmove2)
+                    {
+                        randomIndex2 = Math.floor(Math.random() * possibleMoves.length);
+                        tempmove3 = possibleMoves[randomIndex2]
+                    }
+                    
+                    var chance = getRandomInt(1,4);
+                    
+                    if (chance == 1)
+                    {
+                        sanmove1 = tempmove1;
+                        sanmove2 = tempmove2;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 2)
+                    {
+                        sanmove1 = tempmove2;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove3;
+                    }
+                    
+                    else if (chance == 3)
+                    {
+                        sanmove1 = tempmove3;
+                        sanmove2 = tempmove1;
+                        sanmove3 = tempmove2;
+                    }    
+                }
+            
+                var objmove1 = game.sanTransform(sanmove1);
+                objmove1.promotion = 'q';
+                var objmove2 = game.sanTransform(sanmove2);
+                objmove2.promotion = 'q';
+                var objmove3 = game.sanTransform(sanmove3);
+                objmove3.promotion = 'q';
+                $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                $(document).keydown(function(e){
+                    if(e.which == 82) {
+                        $(body).empty();
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        $(document).off("keydown");
+                        executeGame(difficultySetting, playerSetting);
+                    }
+
+                    if(e.which == 83) {
+                        $("#fenmessage").remove();
+                        fen = game.fen();
+                        $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                        $("#fen").val(fen);
+                    }
+
+                    if(move_state == "move1") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).addClass('highlight-black');
+                            move_state = "move2";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove1);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                cfg.draggable = true;
+                            }
+                        }
+                    }
+
+                    else if(move_state == "move2") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).addClass('highlight-black');
+                            move_state = "move3";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove2);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                cfg.draggable = true;
+                            }
+                        }
+                    }
+
+                    else if(move_state == "move3") {
+                        if(e.which == 0 || e.which == 32 || e.which == 37) {
+                            $('#board').find('.square-' + objmove2.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove2.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.to).addClass('highlight-black');
+                            $('#board').find('.square-' + objmove1.from).addClass('highlight-black');
+                            move_state = "move1";
+                        }
+
+                        else if(e.which == 13 || e.which == 39) {
+                            $("#fenmessage").remove();
+                            game.move(objmove3);
+                            board.position(game.fen());
+                            $('#board').find('.square-' + objmove3.to).removeClass('highlight-black');
+                            $('#board').find('.square-' + objmove3.from).removeClass('highlight-black');
+                            $(document).off("keydown");
+                            if(game.in_checkmate() === true){
+                                window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                            }
+                            else if(game.in_draw() === true) {
+                                window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                            }
+                            else{
+                                cfg.draggable = true;
+                            }
+                        }
+                    }
+                });
+            },2000);
+        };
+        
+       if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(userMove9, 500);
+            }
+            else
+            {
+                //pass
+            }
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove9, 500);
+        }
+    }
+    
+    if(playerSetting == 4)
+    {      
+         var onSnapEnd = function() {
+            board.position(game.fen());
+        };
+        
+        var onDrop = function(source, target) {
+            turn = game.turn();
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
+
+            // illegal move
+            if (move === null) 
+            {
+                return 'snapback';
+            }
+            else
+            {
+                $("#fenmessage").remove();
+                $(document).off("keydown")
+                if(game.in_checkmate() === true){
+                    window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                }
+                else if(game.in_draw() === true) {
+                    window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                }
+                else
+                {
+                    window.setTimeout(aiMove4, 500);
+                }
+            }
+
+        };
+        
+        var cfg = {
+          draggable: true,
+          position: 'start',
+          onDragStart: function(){},
+          onDrop: onDrop,
+          onSnapEnd: onSnapEnd
+        };
+
+        var game = new Chess();
+        
+        board = ChessBoard('board', cfg);
+        
+        var aiMove4 = function() {
+            $(document).off("keydown")
+            cfg.draggable =  false;
+            turn = game.turn();
+            var possibleMoves = game.moves();
+            var randomIndex = Math.floor(Math.random() * possibleMoves.length);
+            var sanmove1 = possibleMoves[randomIndex];
+            var objmove1 = game.sanTransform(sanmove1);
+            objmove1.promotion = 'q';
+            game.move(objmove1);
+            board.position(game.fen());
+            if(game.in_checkmate() === true){
+                endGame(turn, difficultySetting, playerSetting);
+            }
+            else if(game.in_draw() === true) {
+                endGame("d", difficultySetting, playerSetting);
+            }
+            else{
+                cfg.draggable = true;
+                userMove10();
+                //pass
+            }
+        }
+        
+        var userMove10 = function() {
+            $(document).keydown(function(e){
+                if(e.which == 82) {
+                    $(body).empty();
+                    $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                    $(document).off("keydown");
+                    executeGame(difficultySetting, playerSetting);
+                }
+                
+                if(e.which == 83) {
+                    $("#fenmessage").remove();
+                    fen = game.fen();
+                    $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                    $("#fen").val(fen);
+                }  
+            }
+        )};
+        
+        if(fen == undefined)
+        {
+            var chance = getRandomInt(1,3);
+            if (chance == 1){
+                window.setTimeout(aiMove4, 500);
+            }
+            else {
+                //pass
+            }  
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            //pass
+        }
+    }
+    
+    if(playerSetting == 5)
+    {      
+         var onSnapEnd = function() {
+            board.position(game.fen());
+        };
+        
+        var onDrop = function(source, target) {
+            turn = game.turn();
+            var move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: always promote to a queen for example simplicity
+            });
+
+            // illegal move
+            if (move === null) 
+            {
+                return 'snapback';
+            }
+            else
+            {
+                $("#fenmessage").remove();
+                $(document).off("keydown");
+                if(game.in_checkmate() === true){
+                    window.setTimeout(endGame, 1000, turn, difficultySetting, playerSetting);
+                }
+                else if(game.in_draw() === true) {
+                    window.setTimeout(endGame, 1000, "d", difficultySetting, playerSetting);
+                }
+                else
+                {
+                    window.setTimeout(userMove11, 500);
+                }
+            }
+
+        };
+        
+        var cfg = {
+          draggable: true,
+          position: 'start',
+          onDragStart: function(){},
+          onDrop: onDrop,
+          onSnapEnd: onSnapEnd
+        };
+
+        var game = new Chess();
+        
+        board = ChessBoard('board', cfg);
+        
+        var userMove11 = function() {
+            $(document).keydown(function(e){
+                if(e.which == 82) {
+                    $(body).empty();
+                    $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                    $(document).off("keydown");
+                    executeGame(difficultySetting, playerSetting);
+                }
+                
+                if(e.which == 83) {
+                    $("#fenmessage").remove();
+                    fen = game.fen();
+                    $(body).prepend("<div id = \"fenmessage\" class=\"restartandsave\"><p>Here is your FEN:</p> <div><input id = \"fen\" type=\"text\"></div></div>");
+                    $("#fen").val(fen);
+                }  
+            }
+        )};
+        
+        if(fen == undefined)
+        {
+           window.setTimeout(userMove11, 500);
+        }
+        else
+        {
+            game.load(fen);
+            board.position(fen);
+            window.setTimeout(userMove11, 500);
+        }
+    }
 };
 
+function executeLoadGame(difficulty, players) {
+    curr_state = "load";
+    $('#body').append("<h1>LOAD GAME</h1><div class=\"load\"><p>Enter FEN string into the textbox to resume your game: </p><input id = \"box\" type=\"text\"> <br><br><div><button id = \"load\" class=\"loadlist\">Load Game</button><button id = \"main\" class=\"loadlist\">Main Menu</button></div></div><br><br><br><br><br><br><p id = \"error\" ><p>");
+    $('#load').css("background-color", "orange");
+    $(document).keydown(function(e){
+        if(curr_state == "load")
+            {
+                if(e.which == 0 || e.which == 32 || e.which == 37) 
+                {
+                    $('#main').css("background-color", "");
+                    $("#load").css("background-color", "");
+                    $('#load').css("background-color", "#90C3D4");
+                    $("#main").css("background-color", "orange");
+                    curr_state = "main";
+                }
+
+                else if (e.which == 13 || e.which == 39)
+                {
+                    var game = new Chess();
+                    candidate_fen = document.getElementById("box").value;
+                    if(!(game.load(candidate_fen)))
+                    {
+                        $('#error').text("Not a valid game");
+                    }
+                    
+                    else
+                    {
+                        $(body).empty();
+                        $(document).off("keydown");
+                        $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
+                        executeGame(difficulty, players, candidate_fen);
+                    }
+                }
+            } 
+
+            else if (curr_state == "main")
+            {
+                if(e.which == 0 || e.which == 32 || e.which == 37) 
+                {
+                    $('#load').css("background-color", "");
+                    $('#main').css("background-color", "");
+                    $("#load").css("background-color", "orange");
+                    $('#main').css("background-color", "#90C3D4");
+                    curr_state = "load";
+                }
+
+                else if (e.which == 13 || e.which == 39)
+                {
+                    $(document).off("keydown");
+                    $(body).empty();
+                    executeMainMenu();
+                }
+            } 
+    });
+
+}
 function executeMainMenu(){
     curr_state = "quickplay";
-    $('#body').append("<h1>MAIN MENU</h1><div class = \"quist\"><div id = \"qplay\" class=\"quistlist\">Quick Start</div><div id = \"settings\" class=\"quistlist\">Settings</div></div>");
-    $('#qplay').css("background-color", "orange");
-    $('#settings').css("background-color", "gray");
+    $('#body').append("<h1>Chess 4 Everyone</h1><div class = \"quist\"><div><button id =\"qplay\" class=\"quistlist\">Quick Start</button><button button id = \"settings\" class=\"quistlist\">Settings</button></div><br><br><p>This is a chess game that allows for all people to play. In the Settings page, you will find many player select and degree of freedom options.</p><p>A limited player is given options while playing their game. An unlimited player has no options while playing, so they can freely move their pieces however they please.</p><p>One degree of freedom allows for only one move to be picked by the player at their leisure. Two degrees of freedom allow for two options per chess move. Finally, three degrees of freedom allow for three options for each chess move.</p><p>A FEN string is a code that corresponds to the player's current position in their chess game, it's how you can save and load games.</p></div>");
     
-    $(window).on("keypress", function(e){
+    $('#qplay').css("background-color", "orange");
+    $(document).keydown(function(e){
        if(curr_state == "quickplay")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#qplay').css("background-color", "");
                 $('#settings').css("background-color", "");
-                $('#qplay').css("background-color", "gray");
+                $('#qplay').css("background-color", "#90C3D4");
                 $('#settings').css("background-color", "orange");
                 curr_state = "settings";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
-                $(window).off("keypress");
+                $(document).off("keydown");
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
                 executeGame(1,1);
@@ -2423,18 +3501,18 @@ function executeMainMenu(){
         
         else if (curr_state == "settings")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#qplay').css("background-color", "");
                 $('#settings').css("background-color", "");
                 $('#qplay').css("background-color", "orange");
-                $('#settings').css("background-color", "gray");
+                $('#settings').css("background-color", "#90C3D4");
                 curr_state = "quickplay";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
-                $(window).off("keypress");
+                $(document).off("keydown");
                 $(body).empty();
                 executeSettings();
             }
@@ -2457,190 +3535,341 @@ function toggleDropdown(dropdownElement){
 }
 
 function executeSettings() {
-    curr_state = "dof_1";
+    curr_state = "play_1";
     difficulty = -1;
     players = -1;
-    $('#body').append("<h1>SETTINGS</h1><div class=\"dropdown\"><div><button class = \"dropbtn\">Difficulty</button><button class = \"dropbtn\"> Player Select </button></div><table><tr><td><div class = \"ulsett\"><div id= \"dof_1\" class=\"ulsettlist\">One</div><div id=\"dof_2\" class=\"ulsettlist\">Two</div><div id=\"dof_3\" class=\"ulsettlist\">Three</div><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div id= \"play_1\" class=\"ulsettlist\">Player vs. Comp</div><div id=\"play_2\" class=\"ulsettlist\">Player vs. Player</div><div class=\"clearboth\"></div></div></td></tr></table></div><div class = \"title\"><div id = \"reset\" class=\"titlelist\">Reset</div><div id = \"launch\" class=\"titlelist\">Launch</div></div>");
+    $('#body').append("<h1>SETTINGS</h1><div class=\"dropdown\"><div><button class = \"dropbtn\" onclick=\"toggleDropdown(document.getElementsByClassName('ulsett')[0]);\"> Player Select </button><button class = \"dropbtn\" onclick=\"toggleDropdown(document.getElementsByClassName('ulsett')[1]);\"> Degree Of Freedom </button><button id = \"launch\" class=\"dropbtn2\">Start</button><button id = \"reset\" class=\"dropbtn2\">Reset</button><button id = \"load\" class =\"dropbtn2\">Load Game</button></div><table><tr><td><div class = \"ulsett\"><div id = \"play_1\"  class=\"ulsettlist\">Limited vs Comp</div><div id = \"play_2\" class=\"ulsettlist\">Limited vs. Limited</div><div id = \"play_3\" class=\"ulsettlist\">Limited vs. Unlimited</div><div id = \"play_4\" class=\"ulsettlist\">Unlimited vs. Comp</div><div id = \"play_5\" class=\"ulsettlist\">Unlimited vs. Unlimited</div><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div id = \"dof_1\" class=\"ulsettlist\">One</div><div id = \"dof_2\" class=\"ulsettlist\">Two</div><div id = \"dof_3\" class=\"ulsettlist\">Three</div><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div class=\"clearboth\"></div></div></td><td><div class = \"ulsett\"><div class=\"clearboth\"></div></div></td></tr></table></div>");
+    
     toggleDropdown(document.getElementsByClassName('ulsett')[0]);
     toggleDropdown(document.getElementsByClassName('ulsett')[1]);
-    $('#dof_1').css("background-color", "orange");
-    $('#launch').css("background-color", "gray");
-    $('#reset').css("background-color", "gray");
+    $('#play_1').css("background-color", "orange");
 
-    
-    $(window).on("keypress", function(e){
-        if(curr_state == "dof_1")
+    $(document).keydown(function(e){
+        if(curr_state == "play_1")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "orange");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "play_2";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                players = 1;
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "orangered");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "dof_1";
+                $('#dof_1').css("background-color", "");
+                $('#dof_1').css("background-color", "orange");
+            }
+        } 
+        
+        else if(curr_state == "play_2")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "orange");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "play_3";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                players = 2;
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "orangered");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "dof_1";
+                $('#dof_1').css("background-color", "");
+                $('#dof_1').css("background-color", "orange");
+            }
+        } 
+        
+        else if(curr_state == "play_3")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "orange");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "play_4";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                players = 3;
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "orangered");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "dof_1";
+                $('#dof_1').css("background-color", "");
+                $('#dof_1').css("background-color", "orange");
+            }
+        } 
+        
+        else if(curr_state == "play_4")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "orange");
+                curr_state = "play_5";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                players = 4;
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "orangered");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "launch";
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
+            }
+        } 
+        
+        else if(curr_state == "play_5")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "orange");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "#90C3D4");
+                curr_state = "play_1";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                players = 5;
+                $('#play_1').css("background-color", "");
+                $('#play_2').css("background-color", "");
+                $('#play_3').css("background-color", "");
+                $('#play_4').css("background-color", "");
+                $('#play_5').css("background-color", "");
+                $('#play_1').css("background-color", "#90C3D4");
+                $('#play_2').css("background-color", "#90C3D4");
+                $('#play_3').css("background-color", "#90C3D4");
+                $('#play_4').css("background-color", "#90C3D4");
+                $('#play_5').css("background-color", "orangered");
+                curr_state = "launch";
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
+            }
+        } 
+        
+        else if(curr_state == "dof_1")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37)  
             {
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
-                $('#dof_1').css("background-color", "gray");
+                $('#dof_1').css("background-color", "#90C3D4");
                 $('#dof_2').css("background-color", "orange");
-                $('#dof_3').css("background-color", "gray");
+                $('#dof_3').css("background-color", "#90C3D4");
                 curr_state = "dof_2";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
                 difficulty = 0;
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
                 $('#dof_1').css("background-color", "orangered");
-                $('#dof_2').css("background-color", "gray");
-                $('#dof_3').css("background-color", "gray");
-                curr_state = "play_1";
-                $('#play_1').css("background-color", "");
-                $('#play_1').css("background-color", "orange");
+                $('#dof_2').css("background-color", "#90C3D4");
+                $('#dof_3').css("background-color", "#90C3D4");
+                curr_state = "launch";
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
             }
-            
         } 
         
         else if(curr_state == "dof_2")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37)  
             {
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
-                $('#dof_1').css("background-color", "gray");
-                $('#dof_2').css("background-color", "gray");
+                $('#dof_1').css("background-color", "#90C3D4");
+                $('#dof_2').css("background-color", "#90C3D4");
                 $('#dof_3').css("background-color", "orange");
                 curr_state = "dof_3";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
                 difficulty = 1;
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
-                $('#dof_1').css("background-color", "gray");
+                $('#dof_1').css("background-color", "#90C3D4");
                 $('#dof_2').css("background-color", "orangered");
-                $('#dof_3').css("background-color", "gray");   
-                curr_state = "play_1";
-                $('#play_1').css("background-color", "");
-                $('#play_1').css("background-color", "orange");
+                $('#dof_3').css("background-color", "#90C3D4");
+                curr_state = "launch";
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
             }
         } 
         
-        else if(curr_state == "dof_3")
+         else if(curr_state == "dof_3")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
                 $('#dof_1').css("background-color", "orange");
-                $('#dof_2').css("background-color", "gray");
-                $('#dof_3').css("background-color", "gray");
+                $('#dof_2').css("background-color", "#90C3D4");
+                $('#dof_3').css("background-color", "#90C3D4");
                 curr_state = "dof_1";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
                 difficulty = 2;
                 $('#dof_1').css("background-color", "");
                 $('#dof_2').css("background-color", "");
                 $('#dof_3').css("background-color", "");
-                $('#dof_1').css("background-color", "gray");
-                $('#dof_2').css("background-color", "gray");
-                $('#dof_3').css("background-color", "orangered");  
-                curr_state = "play_1";
-                $('#play_1').css("background-color", "");
-                $('#play_1').css("background-color", "orange");
-
-                
-
+                $('#dof_1').css("background-color", "#90C3D4");
+                $('#dof_2').css("background-color", "#90C3D4");
+                $('#dof_3').css("background-color", "orangered");
+                curr_state = "launch";
+                $('#launch').css("background-color", "");
+                $('#launch').css("background-color", "orange");
             }
         } 
         
-        else if (curr_state == "play_1")
-        {
-            if(e.which == 0 || e.which == 32) 
-            {
-                $('#play_1').css("background-color", "");
-                $('#play_2').css("background-color", "");
-                $('#play_1').css("background-color", "gray");
-                $('#play_2').css("background-color", "orange");
-                curr_state = "play_2";
-            }
-            
-            else if (e.which == 13)
-            {
-                players = 1;
-                $('#play_1').css("background-color", "");
-                $('#play_2').css("background-color", "");
-                $('#play_1').css("background-color", "orangered");
-                $('#play_2').css("background-color", "gray"); 
-                curr_state = "launch";
-                $('#launch').css("background-color", "");
-                $('#launch').css("background-color", "orange");
-            }
-        }
-        
-        else if (curr_state == "play_2")
-        {
-            if(e.which == 0 || e.which == 32) 
-            {
-                $('#play_1').css("background-color", "");
-                $('#play_2').css("background-color", "");
-                $('#play_1').css("background-color", "orange");
-                $('#play_2').css("background-color", "gray");
-                curr_state = "play_1";
-            }
-            
-            else if (e.which == 13)
-            {
-                players = 2;
-                $('#play_1').css("background-color", "");
-                $('#play_2').css("background-color", "");
-                $('#play_1').css("background-color", "gray");
-                $('#play_2').css("background-color", "orangered"); 
-                curr_state = "launch";
-                $('#launch').css("background-color", "");
-                $('#launch').css("background-color", "orange");
-            }
-        }
-        
         else if (curr_state == "launch")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#launch').css("background-color", "");
                 $('#reset').css("background-color", "");
-                $('#launch').css("background-color", "gray");
+                $('#load').css("background-color", "");
+                $('#launch').css("background-color", "#90C3D4");
                 $('#reset').css("background-color", "orange");
+                $('#load').css("background-color", "#90C3D4");
                 curr_state = "reset";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
                 $(body).empty();
                 $(body).append("<div id=\"board\" style=\"width: 400px\"></div>");
-                $(window).off("keypress");
+                $(document).off("keydown");
                 executeGame(difficulty, players);
             }
         }
         
         else if (curr_state == "reset")
         {
-            if(e.which == 0 || e.which == 32) 
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
             {
                 $('#launch').css("background-color", "");
                 $('#reset').css("background-color", "");
+                $('#load').css("background-color", "");
+                $('#launch').css("background-color", "#90C3D4");
+                $('#reset').css("background-color", "#90C3D4");
+                $('#load').css("background-color", "orange");
+                curr_state = "load";
+            }
+            
+            else if (e.which == 13 || e.which == 39)
+            {
+                $(body).empty();
+                $(document).off("keydown");
+                executeSettings();
+            }
+        }
+        
+        else if (curr_state == "load")
+        {
+            if(e.which == 0 || e.which == 32 || e.which == 37) 
+            {
+                $('#launch').css("background-color", "");
+                $('#reset').css("background-color", "");
+                $('#load').css("background-color", "");
                 $('#launch').css("background-color", "orange");
-                $('#reset').css("background-color", "gray");
+                $('#reset').css("background-color", "#90C3D4");
+                $('#load').css("background-color", "#90C3D4");
                 curr_state = "launch";
             }
             
-            else if (e.which == 13)
+            else if (e.which == 13 || e.which == 39)
             {
                 $(body).empty();
-                $(window).off("keypress");
-                executeSettings();
+                $(document).off("keydown");
+                executeLoadGame(difficulty, players);
             }
         }
     }); 
