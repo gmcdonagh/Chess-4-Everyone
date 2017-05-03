@@ -1,5 +1,3 @@
-
-
 var g_startOffset = null;
 var g_selectedPiece = null;
 var moveNumber = 1;
