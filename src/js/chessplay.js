@@ -1625,15 +1625,15 @@ function endGame(outcome, difficultySetting, playerSetting) {
 
     if(outcome == "b") 
     {
-        $(body).append("<div class =\"blackwins\">BLACK WINS! <img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div class = \"quist\"><div><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
+        $(body).append("<div class =\"blackwins\">BLACK WINS! <img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div class = \"quist\"><div><br><br><br><br><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
     else if(outcome == "w") 
     {
-        $(body).append("<div class = \"quist\"><div class =\"whitewins\">WHITE WINS! <img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\"></div><div><button id =\"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
+        $(body).append("<div class = \"quist\"><div class =\"whitewins\">WHITE WINS! <img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\"></div><div><br><br><br><br><button id =\"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
     else if(outcome == "d") 
     {
-        $(body).append("<div class = \"quist\"><div class =\"draw\"><img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\">DRAW!<img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
+        $(body).append("<div class = \"quist\"><div class =\"draw\"><img src=\"img/chesspieces/wikipedia/wK.png\" alt= \"White King\" style=\"height:50px;\">DRAW!<img src=\"img/chesspieces/wikipedia/bK.png\" alt= \"Black King\" style=\"height:50px;\"></div><div><br><br><br><br><button id = \"replay\" class=\"endgamelist\">Replay</button><button id = \"main\" class=\"endgamelist\">Main Menu</button></div></div>");
     }
  
     $('#replay').css("background-color", "orange");
