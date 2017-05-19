@@ -1,3 +1,7 @@
+A big thanks to Jeff Hlywa for chess.js, Chris Oakman for chessboard.js, and Gary Linscott for garbochess.js
+
+----------
+
 Copyright (c) 2017, Jeff Hlywa (jhlywa@gmail.com)
 All rights reserved.
 
